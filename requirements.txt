@@ -1,28 +1,22 @@
-# FastAPI and ASGI
-fastapi==0.109.2
-uvicorn[standard]==0.27.1
-python-multipart==0.0.9
+fastapi
+uvicorn[standard]
+python-multipart
 
-# Database
-sqlalchemy[asyncio]==2.0.25
-asyncpg==0.29.0
-alembic==1.13.1
+sqlalchemy[asyncio]
+asyncpg
+alembic
 
-# Authentication
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-bcrypt==4.1.2
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
 
-# Validation and Settings
-pydantic==2.6.1
-pydantic-settings==2.1.0
-email-validator==2.1.0
+pydantic
+pydantic-settings
+email-validator
 
-# Testing
-pytest==7.4.4
-pytest-asyncio==0.23.4
-httpx==0.26.0
-pytest-cov==4.1.0
+pytest
+pytest-asyncio
+httpx
+pytest-cov
 
-# Utilities
-python-dotenv==1.0.1
+python-dotenv
