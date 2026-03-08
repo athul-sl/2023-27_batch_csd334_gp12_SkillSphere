@@ -113,7 +113,7 @@ export default function ServicesPage() {
             </div>
 
             {/* Search and Filters */}
-            <div className="card">
+            <div className="card relative z-10">
                 <form onSubmit={handleSearch} className="flex gap-4">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
