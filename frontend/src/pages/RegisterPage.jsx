@@ -110,6 +110,9 @@ export default function RegisterPage() {
                                             required: 'Full name is required',
                                             minLength: { value: 2, message: 'Name must be at least 2 characters' }
                                         })}
+                                        onInput={(e) => {
+                                            e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                        }}
                                         className="input-field pl-10"
                                         placeholder="John Doe"
                                     />
@@ -218,8 +221,11 @@ export default function RegisterPage() {
                                 <input
                                     type="text"
                                     {...register('student_id')}
+                                    onInput={(e) => {
+                                        e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+                                    }}
                                     className="input-field"
-                                    placeholder="2024001"
+                                    placeholder="CHN23CS001"
                                 />
                             </div>
 
@@ -312,6 +318,9 @@ export default function RegisterPage() {
                                 <input
                                     type="tel"
                                     {...register('phone')}
+                                    onInput={(e) => {
+                                        e.target.value = e.target.value.replace(/[^0-9+\s]/g, '');
+                                    }}
                                     className="input-field pl-10"
                                     placeholder="+91 9876543210"
                                 />

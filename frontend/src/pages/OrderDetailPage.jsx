@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Star, CreditCard, Smartphone, Landmark, Banknote, X, CheckCircle } from 'lucide-react';
 import { ordersAPI, reviewsAPI } from '../lib/api';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
@@ -15,6 +15,12 @@ export default function OrderDetailPage() {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
+
+    // Payment modal state
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+    const [processingPayment, setProcessingPayment] = useState(false);
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
 
     // Review form state
     const [showReviewForm, setShowReviewForm] = useState(false);
@@ -61,6 +67,45 @@ export default function OrderDetailPage() {
             .finally(() => {
                 setUpdating(false);
             });
+    };
+
+    // 💳 Handle payment flow
+    const handlePayment = async () => {
+        if (!selectedPaymentMethod) {
+            toast.error('Please select a payment method');
+            return;
+        }
+
+        setProcessingPayment(true);
+
+        // Simulate payment processing delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        try {
+            // Update payment status via API
+            await ordersAPI.updatePayment(id, {
+                payment_status: 'paid',
+                payment_method: selectedPaymentMethod
+            });
+
+            setPaymentSuccess(true);
+
+            // Wait a moment to show success state, then complete the order
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Complete the order
+            await ordersAPI.updateOrderStatus(id, { status: 'completed' });
+
+            toast.success('Payment successful! Order completed.');
+            setShowPaymentModal(false);
+            setPaymentSuccess(false);
+            setSelectedPaymentMethod('');
+            loadOrder();
+        } catch (error) {
+            toast.error(error.response?.data?.detail || 'Payment failed. Please try again.');
+        } finally {
+            setProcessingPayment(false);
+        }
     };
 
     // ⭐ Submit a review
@@ -222,11 +267,15 @@ export default function OrderDetailPage() {
                     {isClient && order.status === 'delivered' && (
                         <>
                             <button
-                                onClick={() => updateStatus('completed')}
+                                onClick={() => {
+                                    setShowPaymentModal(true);
+                                    setSelectedPaymentMethod('');
+                                    setPaymentSuccess(false);
+                                }}
                                 disabled={updating}
                                 className="btn-primary"
                             >
-                                {updating ? 'Updating...' : 'Accept & Complete'}
+                                Accept & Pay
                             </button>
                             <button
                                 onClick={() => {
@@ -354,6 +403,101 @@ export default function OrderDetailPage() {
             )}
 
             {/* Order Timeline/History could go here */}
+
+            {/* 💳 Payment Modal */}
+            {showPaymentModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => !processingPayment && setShowPaymentModal(false)}>
+                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+                        {/* Modal Header */}
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-gray-900">Complete Payment</h3>
+                            {!processingPayment && (
+                                <button onClick={() => setShowPaymentModal(false)} className="text-gray-400 hover:text-gray-600">
+                                    <X size={22} />
+                                </button>
+                            )}
+                        </div>
+
+                        {paymentSuccess ? (
+                            /* Success State */
+                            <div className="text-center py-8">
+                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <CheckCircle size={36} className="text-green-600" />
+                                </div>
+                                <h4 className="text-lg font-bold text-gray-900 mb-1">Payment Successful!</h4>
+                                <p className="text-gray-500">Completing your order...</p>
+                            </div>
+                        ) : processingPayment ? (
+                            /* Processing State */
+                            <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                                <h4 className="text-lg font-bold text-gray-900 mb-1">Processing Payment...</h4>
+                                <p className="text-gray-500">Please wait while we process your payment</p>
+                            </div>
+                        ) : (
+                            /* Payment Method Selection */
+                            <>
+                                {/* Order Amount */}
+                                <div className="bg-gray-50 rounded-xl p-4 mb-6 text-center">
+                                    <p className="text-sm text-gray-500 mb-1">Amount to Pay</p>
+                                    <p className="text-3xl font-bold text-primary-600">₹{order.agreed_price}</p>
+                                    <p className="text-xs text-gray-400 mt-1">for {order.service?.title || order.service_title}</p>
+                                </div>
+
+                                {/* Payment Methods */}
+                                <div className="space-y-3 mb-6">
+                                    <p className="text-sm font-medium text-gray-700">Select Payment Method</p>
+
+                                    {[
+                                        { id: 'credit_card', label: 'Credit / Debit Card', desc: 'Visa, Mastercard, RuPay', icon: CreditCard, color: 'text-blue-600 bg-blue-50' },
+                                        { id: 'upi', label: 'UPI', desc: 'Google Pay, PhonePe, Paytm', icon: Smartphone, color: 'text-purple-600 bg-purple-50' },
+                                        { id: 'net_banking', label: 'Net Banking', desc: 'All major banks supported', icon: Landmark, color: 'text-green-600 bg-green-50' },
+                                        { id: 'cash', label: 'Cash on Delivery', desc: 'Pay when you meet', icon: Banknote, color: 'text-yellow-600 bg-yellow-50' },
+                                    ].map((method) => (
+                                        <button
+                                            key={method.id}
+                                            onClick={() => setSelectedPaymentMethod(method.id)}
+                                            className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${selectedPaymentMethod === method.id
+                                                    ? 'border-primary-500 bg-primary-50 shadow-sm'
+                                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${method.color}`}>
+                                                <method.icon size={22} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="font-semibold text-gray-900">{method.label}</p>
+                                                <p className="text-xs text-gray-500">{method.desc}</p>
+                                            </div>
+                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentMethod === method.id
+                                                    ? 'border-primary-500'
+                                                    : 'border-gray-300'
+                                                }`}>
+                                                {selectedPaymentMethod === method.id && (
+                                                    <div className="w-3 h-3 rounded-full bg-primary-500"></div>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Pay Button */}
+                                <button
+                                    onClick={handlePayment}
+                                    disabled={!selectedPaymentMethod}
+                                    className="btn-primary w-full py-3 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Pay ₹{order.agreed_price}
+                                </button>
+
+                                <p className="text-xs text-gray-400 text-center mt-3">
+                                    🔒 This is a simulated payment for demonstration purposes
+                                </p>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

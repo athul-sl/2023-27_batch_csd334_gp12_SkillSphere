@@ -405,11 +405,11 @@ export default function ProfilePage() {
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                                    <input type="text" {...register('full_name')} className="input-field" disabled={!editing} />
+                                    <input type="text" {...register('full_name')} onInput={(e) => { e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); }} className="input-field" disabled={!editing} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
-                                    <input type="text" {...register('student_id')} className="input-field" disabled={!editing} />
+                                    <input type="text" {...register('student_id')} onInput={(e) => { e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, ''); }} className="input-field" disabled={!editing} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Branch</label>
@@ -467,7 +467,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                                    <input type="tel" {...register('phone')} className="input-field" disabled={!editing} />
+                                    <input type="tel" {...register('phone')} onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9+\s]/g, ''); }} className="input-field" disabled={!editing} />
                                 </div>
                             </div>
                             <div>

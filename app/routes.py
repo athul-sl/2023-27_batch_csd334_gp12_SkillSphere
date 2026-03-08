@@ -489,8 +489,8 @@ async def update_payment(order_id: int, payment_update: PaymentUpdate, db: Async
     order = result.scalar_one_or_none()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    if order.provider_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only provider can update payment")
+    if order.provider_id != current_user.id and order.client_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only client or provider can update payment")
     order.payment_status = payment_update.payment_status
     order.payment_method = payment_update.payment_method
     await db.commit()
@@ -773,12 +773,13 @@ async def create_or_get_conversation(data: ConversationCreate, db: AsyncSession 
         raise HTTPException(status_code=404, detail="User not found")
     
     # Look for ANY existing conversation between these two users (one conversation per pair)
+    # Use .first() instead of .scalar_one_or_none() to handle duplicate conversations gracefully
     existing_query = select(Conversation).where(
         or_(
             and_(Conversation.user1_id == current_user.id, Conversation.user2_id == data.user_id),
             and_(Conversation.user1_id == data.user_id, Conversation.user2_id == current_user.id)
         )
-    )
+    ).order_by(Conversation.created_at.asc())
     
     existing_query = existing_query.options(
         selectinload(Conversation.user1),
@@ -787,7 +788,7 @@ async def create_or_get_conversation(data: ConversationCreate, db: AsyncSession 
         selectinload(Conversation.messages).selectinload(Message.sender)
     )
     result = await db.execute(existing_query)
-    conv = result.scalar_one_or_none()
+    conv = result.scalars().first()
     
     if not conv:
         conv = Conversation(user1_id=current_user.id, user2_id=data.user_id, service_id=data.service_id)
