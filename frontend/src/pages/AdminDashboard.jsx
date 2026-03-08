@@ -4,6 +4,8 @@ import { adminAPI } from '../lib/api';
 import toast from 'react-hot-toast';
 import { Users, Package, ShoppingBag, DollarSign, Trash2, Shield, ShieldOff, Search, ChevronLeft, ChevronRight, Edit, ExternalLink } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState(null);
@@ -45,8 +47,8 @@ export default function AdminDashboard() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-5 py-2.5 font-medium text-sm rounded-t-lg transition-colors ${activeTab === tab.id
-                                ? 'bg-white border border-b-white border-gray-200 text-primary-600 -mb-px'
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                            ? 'bg-white border border-b-white border-gray-200 text-primary-600 -mb-px'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                             }`}
                     >
                         {tab.label}
@@ -186,9 +188,17 @@ function UsersTab() {
                                 <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                                     <td className="py-3">
                                         <Link to={`/users/${user.id}`} className="flex items-center gap-3 group">
-                                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-bold">
-                                                {user.full_name?.charAt(0) || 'U'}
-                                            </div>
+                                            {user.profile_image ? (
+                                                <img
+                                                    src={`${API_BASE}${user.profile_image}`}
+                                                    alt={user.full_name}
+                                                    className="w-9 h-9 rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-bold">
+                                                    {user.full_name?.charAt(0) || 'U'}
+                                                </div>
+                                            )}
                                             <span className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
                                                 {user.full_name}
                                             </span>
@@ -197,18 +207,18 @@ function UsersTab() {
                                     <td className="py-3 text-sm text-gray-600">{user.email}</td>
                                     <td className="py-3">
                                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${user.role === 'admin'
-                                                ? 'bg-purple-100 text-purple-700'
-                                                : 'bg-gray-100 text-gray-600'
+                                            ? 'bg-purple-100 text-purple-700'
+                                            : 'bg-gray-100 text-gray-600'
                                             }`}>
                                             {user.role}
                                         </span>
                                     </td>
                                     <td className="py-3">
                                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${user.status === 'active'
-                                                ? 'bg-green-100 text-green-700'
-                                                : user.status === 'suspended'
-                                                    ? 'bg-red-100 text-red-700'
-                                                    : 'bg-yellow-100 text-yellow-700'
+                                            ? 'bg-green-100 text-green-700'
+                                            : user.status === 'suspended'
+                                                ? 'bg-red-100 text-red-700'
+                                                : 'bg-yellow-100 text-yellow-700'
                                             }`}>
                                             {user.status}
                                         </span>
@@ -222,8 +232,8 @@ function UsersTab() {
                                                 onClick={() => handleToggleRole(user)}
                                                 title={user.role === 'admin' ? 'Remove admin' : 'Make admin'}
                                                 className={`p-2 rounded-lg transition-colors ${user.role === 'admin'
-                                                        ? 'text-purple-600 hover:bg-purple-50'
-                                                        : 'text-gray-400 hover:bg-gray-100 hover:text-purple-600'
+                                                    ? 'text-purple-600 hover:bg-purple-50'
+                                                    : 'text-gray-400 hover:bg-gray-100 hover:text-purple-600'
                                                     }`}
                                             >
                                                 {user.role === 'admin' ? <ShieldOff size={18} /> : <Shield size={18} />}
@@ -375,12 +385,12 @@ function ServicesTab() {
                                     </td>
                                     <td className="py-3">
                                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${service.status === 'approved'
-                                                ? 'bg-green-100 text-green-700'
-                                                : service.status === 'pending'
-                                                    ? 'bg-yellow-100 text-yellow-700'
-                                                    : service.status === 'rejected'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-gray-100 text-gray-600'
+                                            ? 'bg-green-100 text-green-700'
+                                            : service.status === 'pending'
+                                                ? 'bg-yellow-100 text-yellow-700'
+                                                : service.status === 'rejected'
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-gray-100 text-gray-600'
                                             }`}>
                                             {service.status}
                                         </span>

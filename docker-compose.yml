@@ -97,7 +97,6 @@ services:
     restart: unless-stopped
     profiles:
       - production
-
 networks:
   skillsphere_network:
     driver: bridge
