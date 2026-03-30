@@ -68,7 +68,6 @@ export const ordersAPI = {
     updateOrderStatus: (id, data) => api.put(`/orders/${id}/status`, data),
     updatePayment: (id, data) => api.put(`/orders/${id}/payment`, data),
 };
-
 // Reviews API
 export const reviewsAPI = {
     getServiceReviews: (serviceId, params) => api.get(`/reviews/service/${serviceId}`, { params }),
@@ -76,7 +75,6 @@ export const reviewsAPI = {
     createReview: (data) => api.post('/reviews', data),
     addResponse: (id, data) => api.post(`/reviews/${id}/response`, data),
 };
-
 // Admin API
 export const adminAPI = {
     getStats: () => api.get('/admin/stats'),
@@ -87,7 +85,6 @@ export const adminAPI = {
     listServices: (params) => api.get('/admin/services', { params }),
     deleteService: (id) => api.delete(`/admin/services/${id}`),
 };
-
 // Chat API
 export const chatAPI = {
     listConversations: () => api.get('/chat/conversations'),
@@ -97,14 +94,12 @@ export const chatAPI = {
     markAsRead: (conversationId) => api.put(`/chat/conversations/${conversationId}/read`),
     getUnreadCount: () => api.get('/chat/unread-count'),
 };
-
 // Portfolio API
 export const portfolioAPI = {
     getUserPortfolio: (userId) => api.get(`/portfolio/user/${userId}`),
     addProject: (data) => api.post('/portfolio', data),
     deleteProject: (id) => api.delete(`/portfolio/${id}`),
 };
-
 // Upload API
 export const uploadAPI = {
     uploadFile: (file) => {
@@ -115,4 +110,3 @@ export const uploadAPI = {
         });
     },
 };
-
